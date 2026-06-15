@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>16タイプ簡易セルフチェック</title>
+  <style>
+    :root {
+      --bg: #f5fafb;
+      --surface: #ffffff;
+      --surface-soft: #eef8f6;
+      --text: #20313a;
+      --muted: #5d7078;
+      --line: #d7e8ea;
+      --primary: #2d7f9a;
+      --primary-dark: #22657d;
+      --green: #5ba987;
+      --green-soft: #e8f6ef;
+      --blue-soft: #e8f3fb;
+      --warning: #8a5a19;
+      --warning-bg: #fff7e5;
+      --shadow: 0 18px 45px rgba(39, 91, 108, 0.14);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "YuGothic", "Noto Sans JP", Meiryo, sans-serif;
+      font-size: 17px;
+      line-height: 1.75;
+      background:
+        linear-gradient(135deg, rgba(232, 246, 239, 0.92), rgba(232, 243, 251, 0.78) 42%, rgba(255, 255, 255, 0.96)),
+        var(--bg);
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .page {
+      width: min(1040px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0;
+    }
+
+    .app-shell {
+      min-height: calc(100vh - 64px);
+      display: grid;
+      align-items: center;
+    }
+
+    .panel {
+      width: 100%;
+      padding: clamp(24px, 4vw, 48px);
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(215, 232, 234, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .top-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.72fr);
+      gap: clamp(22px, 4vw, 48px);
+      align-items: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--primary-dark);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.28;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      max-width: 680px;
+      font-size: clamp(2rem, 5vw, 3.45rem);
+    }
+
+    h2 {
+      font-size: clamp(1.55rem, 3.4vw, 2.4rem);
+    }
+
+    h3 {
+      font-size: 1.18rem;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    .lead {
+      margin-top: 18px;
+      max-width: 720px;
+      color: var(--muted);
+      font-size: clamp(1.05rem, 2.1vw, 1.2rem);
+    }
+
+    .notice {
+      margin-top: 22px;
+      padding: 16px 18px;
+      color: #4d3a12;
+      background: var(--warning-bg);
+      border: 1px solid #f1dba6;
+      border-radius: var(--radius);
+      font-size: 0.98rem;
+    }
+
+    .user-form {
+      display: grid;
+      gap: 16px;
+      margin-top: 22px;
+      padding: 18px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label,
+    .consent-check {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 12px;
+      color: var(--text);
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      font: inherit;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--primary);
+      outline: 3px solid rgba(91, 169, 135, 0.24);
+    }
+
+    .privacy-note {
+      padding: 14px 16px;
+      color: var(--muted);
+      background: var(--surface-soft);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+    }
+
+    .consent-check {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      cursor: pointer;
+      line-height: 1.55;
+    }
+
+    .consent-check input {
+      width: 20px;
+      height: 20px;
+      margin-top: 3px;
+      accent-color: var(--primary);
+    }
+
+    .form-error {
+      min-height: 1.5em;
+      color: #a04722;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .form-error:empty {
+      display: none;
+    }
+
+    .info-list {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .info-card {
+      padding: 16px;
+      background: var(--surface-soft);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .info-label {
+      display: block;
+      color: var(--primary-dark);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .info-value {
+      display: block;
+      margin-top: 2px;
+      color: var(--text);
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .button {
+      min-height: 54px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 24px;
+      color: #ffffff;
+      background: var(--primary);
+      border: 0;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-weight: 700;
+      text-align: center;
+      text-decoration: none;
+      box-shadow: 0 10px 22px rgba(45, 127, 154, 0.24);
+      transition: transform 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(45, 127, 154, 0.28);
+    }
+
+    .button:focus-visible,
+    .choice:focus-visible {
+      outline: 3px solid rgba(91, 169, 135, 0.42);
+      outline-offset: 3px;
+    }
+
+    .button.secondary {
+      color: var(--primary-dark);
+      background: #ffffff;
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .button.secondary:hover,
+    .button.secondary:focus-visible {
+      background: var(--blue-soft);
+    }
+
+    .button:disabled {
+      cursor: not-allowed;
+      opacity: 0.46;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .question-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .question-count {
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
+    .axis-pill {
+      padding: 6px 12px;
+      color: var(--primary-dark);
+      background: var(--blue-soft);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .progress {
+      height: 14px;
+      margin-bottom: 26px;
+      overflow: hidden;
+      background: #e3eef1;
+      border-radius: 999px;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--green));
+      border-radius: 999px;
+      transition: width 0.25s ease;
+    }
+
+    .question-text {
+      margin-bottom: 8px;
+      font-size: clamp(1.35rem, 3vw, 2rem);
+      font-weight: 700;
+      line-height: 1.55;
+    }
+
+    .question-hint {
+      margin-bottom: 22px;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .choice-list {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .choice {
+      width: 100%;
+      min-height: 92px;
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+      padding: 18px;
+      color: var(--text);
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+    }
+
+    .choice:hover,
+    .choice.selected {
+      background: var(--surface-soft);
+      border-color: var(--green);
+      transform: translateY(-1px);
+    }
+
+    .choice-number {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      color: var(--primary-dark);
+      background: var(--blue-soft);
+      border-radius: 50%;
+      font-weight: 800;
+      font-size: 1.15rem;
+    }
+
+    .choice-copy {
+      display: block;
+      padding-top: 2px;
+      font-weight: 700;
+      line-height: 1.65;
+    }
+
+    .question-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .result-hero {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 28px;
+      padding: clamp(22px, 4vw, 34px);
+      background: linear-gradient(135deg, var(--green-soft), var(--blue-soft));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .result-kicker {
+      color: var(--primary-dark);
+      font-size: 0.92rem;
+      font-weight: 800;
+    }
+
+    .result-title {
+      font-size: clamp(1.5rem, 3.6vw, 2.55rem);
+    }
+
+    .result-summary {
+      max-width: 820px;
+      color: var(--muted);
+      font-size: clamp(1.05rem, 2.1vw, 1.18rem);
+    }
+
+    .result-duration,
+    .submit-status {
+      color: var(--muted);
+      font-size: 0.98rem;
+      font-weight: 700;
+    }
+
+    .section-title {
+      margin-bottom: 12px;
+      color: var(--primary-dark);
+      font-size: 1.25rem;
+    }
+
+    .section-note {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .result-cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 30px;
+    }
+
+    .result-card {
+      min-height: 168px;
+      padding: 20px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 24px rgba(39, 91, 108, 0.08);
+    }
+
+    .result-card h3 {
+      margin-bottom: 10px;
+      color: var(--primary-dark);
+    }
+
+    .result-card p {
+      color: var(--muted);
+    }
+
+    .score-panel {
+      padding: 22px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .score-list {
+      display: grid;
+      gap: 18px;
+    }
+
+    .score-row {
+      display: grid;
+      grid-template-columns: 74px minmax(0, 1fr) 74px;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .score-row-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      grid-column: 1 / -1;
+    }
+
+    .score-axis {
+      font-weight: 800;
+    }
+
+    .score-tendency {
+      color: var(--primary-dark);
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .score-label {
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .score-label.left {
+      text-align: right;
+    }
+
+    .score-label.right {
+      text-align: left;
+    }
+
+    .score-bar {
+      position: relative;
+      height: 18px;
+      flex: 1;
+      overflow: hidden;
+      background: #e8eff1;
+      border: 1px solid #cfe2e5;
+      border-radius: 999px;
+    }
+
+    .center-line {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: rgba(32, 49, 58, 0.18);
+      transform: translateX(-50%);
+      z-index: 2;
+    }
+
+    .score-fill {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      content: "";
+      background: linear-gradient(90deg, #3b82f6, #22c55e);
+      border-radius: 999px;
+    }
+
+    .score-fill.left-fill {
+      right: 50%;
+      background: linear-gradient(90deg, #22c55e, #3b82f6);
+    }
+
+    .score-fill.right-fill {
+      left: 50%;
+    }
+
+    .score-meta {
+      color: var(--muted);
+      font-size: 0.94rem;
+      grid-column: 1 / -1;
+    }
+
+    .type-code {
+      display: block;
+      color: var(--primary-dark);
+      font-size: clamp(3.2rem, 10vw, 6.8rem);
+      font-weight: 900;
+      letter-spacing: 0;
+      line-height: 0.98;
+    }
+
+    .disclaimer-result {
+      margin-top: 24px;
+    }
+
+    .result-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .submit-status {
+      min-height: 1.5em;
+      margin-top: 16px;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #7a8a8a;
+      margin-top: 32px;
+      padding: 16px;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        font-size: 16px;
+      }
+
+      .page {
+        width: min(100% - 20px, 1040px);
+        padding: 10px 0;
+      }
+
+      .app-shell {
+        min-height: calc(100vh - 20px);
+      }
+
+      .panel {
+        padding: 22px 16px;
+      }
+
+      .top-grid,
+      .result-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .question-head,
+      .question-actions,
+      .actions,
+      .result-actions {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .axis-pill {
+        width: fit-content;
+      }
+
+      .button {
+        width: 100%;
+      }
+
+      .choice {
+        grid-template-columns: 44px minmax(0, 1fr);
+        min-height: 84px;
+        padding: 13px;
+      }
+
+      .choice-number {
+        width: 44px;
+        height: 44px;
+      }
+
+      .score-panel {
+        padding: 16px;
+      }
+
+      .score-row-head,
+      .score-label {
+        font-size: 0.94rem;
+      }
+
+      .score-row {
+        grid-template-columns: 54px minmax(0, 1fr) 54px;
+        gap: 8px;
+      }
+
+      .footer {
+        margin-top: 24px;
+        padding: 14px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page app-shell">
+    <section id="startScreen" class="screen active" aria-labelledby="appTitle">
+      <div class="panel top-grid">
+        <div>
+          <p class="eyebrow">自己理解のための簡易チェック</p>
+          <h1 id="appTitle">16タイプ簡易セルフチェック</h1>
+          <p class="lead">
+            このチェックでは、各質問について「どちらがより自分に近いか」を選んでいただきます。
+            どちらも当てはまる、またはどちらも当てはまらないと感じる場合でも、深く考えすぎず、今の自分により自然に近い方を選んでください。
+          </p>
+          <div class="notice" role="note">
+            このアプリは公式MBTI検査ではありません。結果は性格や能力を断定するものではなく、自己理解を深めるための参考情報です。
+            採用・選考・人事評価などの目的には使用しないでください。
+          </div>
+          <div class="user-form" aria-labelledby="userInfoTitle">
+            <h2 id="userInfoTitle" class="section-title">診断前の入力</h2>
+            <div class="form-grid">
+              <div class="field">
+                <label for="nicknameInput">お名前（ニックネーム可）</label>
+                <input id="nicknameInput" type="text" maxlength="30" autocomplete="name" required>
+              </div>
+              <div class="field">
+                <label for="ageGroupSelect">年代</label>
+                <select id="ageGroupSelect" required>
+                  <option value="">選択してください</option>
+                  <option value="10代">10代</option>
+                  <option value="20代">20代</option>
+                  <option value="30代">30代</option>
+                  <option value="40代">40代</option>
+                  <option value="50代">50代</option>
+                  <option value="60代">60代</option>
+                  <option value="70代以上">70代以上</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="genderSelect">性別</label>
+                <select id="genderSelect" required>
+                  <option value="">選択してください</option>
+                  <option value="男性">男性</option>
+                  <option value="女性">女性</option>
+                  <option value="その他">その他</option>
+                  <option value="回答しない">回答しない</option>
+                </select>
+              </div>
+            </div>
+            <p class="privacy-note">
+              入力いただいた情報および診断結果は、サービスの利用状況の分析、診断内容の改善、セミナー・サービス改善のために利用します。
+              取得する情報は、実施日時、お名前（ニックネーム可）、年代、性別、結果タイプ、回答所要時間、流入元です。
+              入力情報を、本人の同意なく上記以外の目的で利用することはありません。
+            </p>
+            <label class="consent-check" for="privacyConsent">
+              <input id="privacyConsent" type="checkbox" required>
+              <span>上記の個人情報の取扱いと利用目的に同意します</span>
+            </label>
+            <p id="formError" class="form-error" role="alert" aria-live="polite"></p>
+          </div>
+          <div class="actions">
+            <button id="startButton" class="button" type="button" disabled>チェックを始める</button>
+          </div>
+        </div>
+        <ul class="info-list" aria-label="チェックの概要">
+          <li class="info-card">
+            <span class="info-label">所要時間</span>
+            <span class="info-value">約5〜10分</span>
+          </li>
+          <li class="info-card">
+            <span class="info-label">質問数</span>
+            <span class="info-value">36問</span>
+          </li>
+          <li class="info-card">
+            <span class="info-label">回答形式</span>
+            <span class="info-value">2者択一</span>
+          </li>
+          <li class="info-card">
+            <span class="info-label">扱う傾向</span>
+            <span class="info-value">E/I、S/N、T/F、J/P</span>
+          </li>
+        </ul>
+      </div>
+      <footer class="footer">
+        Copyright PAL CREATIONS All Rights Reserved.
+      </footer>
+    </section>
+
+    <section id="questionScreen" class="screen" aria-labelledby="questionTitle">
+      <div class="panel">
+        <div class="question-head">
+          <p id="questionCounter" class="question-count">質問 1 / 36</p>
+          <p id="axisLabel" class="axis-pill">E/I</p>
+        </div>
+        <div class="progress" aria-hidden="true">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+        <h2 id="questionTitle" class="question-text"></h2>
+        <p class="question-hint" id="choiceHelp">迷った場合は、より自然に近い方を選んでください。</p>
+        <ol id="choiceList" class="choice-list" aria-describedby="choiceHelp"></ol>
+        <div class="question-actions">
+          <button id="backButton" class="button secondary" type="button">前の質問へ</button>
+          <button id="quitButton" class="button secondary" type="button">トップに戻る</button>
+        </div>
+      </div>
+      <footer class="footer">
+        Copyright PAL CREATIONS All Rights Reserved.
+      </footer>
+    </section>
+
+    <section id="resultScreen" class="screen" aria-labelledby="resultTitle">
+      <div class="panel">
+        <div class="result-hero">
+          <p class="result-kicker">今回のセルフチェック結果</p>
+          <span id="typeCode" class="type-code">----</span>
+          <h2 id="resultTitle" class="result-title">----：----傾向が見られます</h2>
+          <p id="summaryText" class="result-summary"></p>
+          <p id="durationText" class="result-duration"></p>
+        </div>
+
+        <div class="result-cards" aria-label="結果の概要">
+          <article class="result-card">
+            <h3>強み</h3>
+            <p id="strengthText"></p>
+          </article>
+          <article class="result-card">
+            <h3>注意点</h3>
+            <p id="cautionText"></p>
+          </article>
+          <article class="result-card">
+            <h3>活かすヒント</h3>
+            <p id="hintText"></p>
+          </article>
+        </div>
+
+        <section class="score-panel" aria-labelledby="scoreTitle">
+          <h3 id="scoreTitle" class="section-title">4軸のスコア</h3>
+          <div id="axisResults" class="score-list"></div>
+          <p class="section-note">
+            中央に近いほど、場面によって両方の傾向を使い分けている可能性があります。
+          </p>
+        </section>
+        <p id="submitStatus" class="submit-status" aria-live="polite"></p>
+
+        <div class="notice disclaimer-result" role="note">
+          このチェックは、公式MBTI検査ではありません。
+          結果は、自己理解を深めるための参考情報であり、性格や能力を決めつけるものではありません。
+          また、採用・選考・人事評価などの目的には使用しないでください。
+        </div>
+
+        <div class="result-actions">
+          <button id="restartButton" class="button" type="button">もう一度チェックする</button>
+          <!-- 自己理解セッションの案内先URLは、後から href の値を変更してください。 -->
+          <a
+            class="button secondary"
+            href="https://www.reservestock.jp/page/consecutive_events/7819"
+            target="_blank"
+            rel="noopener noreferrer"
+          >自己理解セッションへの案内</a>
+        </div>
+      </div>
+      <footer class="footer">
+        Copyright PAL CREATIONS All Rights Reserved.
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    /*
+      Google Apps ScriptのWebアプリURLを設定してください。
+      例: https://script.google.com/macros/s/xxxxxxxxxxxxxxxx/exec
+      未設定のままだと、結果画面には送信失敗メッセージが表示されます。
+    */
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbytAH510P2DA_Djq1t_n8WSkMVkcxp-I1UEvJJiufDxe_-93PH7W6xPSlkpez5YiR_bPA/exec";
+
+    /*
+      編集メモ:
+      - questions 配列を書き換えると、2択の文章や軸を変更できます。
+      - axis は EI、SN、TF、JP のいずれかです。
+      - optionA を選ぶと typeA に1点、optionB を選ぶと typeB に1点入ります。
+    */
+    const questions = [
+      { axis: "EI", optionA: "人と話しながら考えを整理することが多い", typeA: "E", optionB: "一人で考えてから話す方が整理しやすい", typeB: "I" },
+      { axis: "EI", optionA: "初対面の人とも比較的早く会話を始めやすい", typeA: "E", optionB: "慣れてから少しずつ話す方が自然に感じる", typeB: "I" },
+      { axis: "EI", optionA: "複数人でやりとりする中で元気が出やすい", typeA: "E", optionB: "一人で過ごす時間で気持ちを整えやすい", typeB: "I" },
+      { axis: "EI", optionA: "考えは外に出しながら形にしていくことが多い", typeA: "E", optionB: "考えは内側でじっくりまとめてから出すことが多い", typeB: "I" },
+      { axis: "EI", optionA: "人と会う予定があると気分が上がりやすい", typeA: "E", optionB: "予定のない静かな時間があると安心しやすい", typeB: "I" },
+      { axis: "EI", optionA: "気になることは早めに誰かへ共有したくなる", typeA: "E", optionB: "気になることはまず自分の中で整理したくなる", typeB: "I" },
+      { axis: "EI", optionA: "新しい集まりやイベントに参加することに抵抗が少ない", typeA: "E", optionB: "落ち着いた環境で親しい人と関わる方が心地よい", typeB: "I" },
+      { axis: "EI", optionA: "話し合いでは発言しながら考えがまとまりやすい", typeA: "E", optionB: "話し合いでは聞きながら考えてから発言したい", typeB: "I" },
+      { axis: "EI", optionA: "外からの刺激がある方が動き出しやすい", typeA: "E", optionB: "静かな時間がある方が自分らしく動き出しやすい", typeB: "I" },
+
+      { axis: "SN", optionA: "具体的な事実や経験をもとに考えることが多い", typeA: "S", optionB: "可能性や将来の展開を考えることに関心が向きやすい", typeB: "N" },
+      { axis: "SN", optionA: "説明は具体例や手順があると理解しやすい", typeA: "S", optionB: "説明は全体像や意味がわかると理解しやすい", typeB: "N" },
+      { axis: "SN", optionA: "実績のある方法をもとに進めると安心しやすい", typeA: "S", optionB: "新しい方法や別の可能性を試すことに惹かれやすい", typeB: "N" },
+      { axis: "SN", optionA: "今ある情報を正確に確認することを大切にしたい", typeA: "S", optionB: "まだ見えていないつながりや背景を考えたい", typeB: "N" },
+      { axis: "SN", optionA: "現実的にできることから順番に考えたい", typeA: "S", optionB: "まず大きな方向性や理想の姿を考えたい", typeB: "N" },
+      { axis: "SN", optionA: "話が抽象的なときは具体的に何をするか確認したい", typeA: "S", optionB: "具体的な話からさらに広い意味や可能性を考えたい", typeB: "N" },
+      { axis: "SN", optionA: "過去の経験から学んだことを活かす方が得意だ", typeA: "S", optionB: "まだないアイデアを広げる方が得意だ", typeB: "N" },
+      { axis: "SN", optionA: "細部を確認しながら進めると安心できる", typeA: "S", optionB: "全体の流れを見ながら進めると動きやすい", typeB: "N" },
+      { axis: "SN", optionA: "目に見える成果や事実を重視しやすい", typeA: "S", optionB: "将来の展開や新しい意味を重視しやすい", typeB: "N" },
+
+      { axis: "TF", optionA: "判断するときは筋道や公平さを重視することが多い", typeA: "T", optionB: "判断するときは人の気持ちや関係性を重視することが多い", typeB: "F" },
+      { axis: "TF", optionA: "意見が違うときは問題点を率直に整理したい", typeA: "T", optionB: "意見が違うときは相手の受け止め方も大切にしたい", typeB: "F" },
+      { axis: "TF", optionA: "納得するには論理的な理由があると安心する", typeA: "T", optionB: "納得するには関係する人への影響が見えると安心する", typeB: "F" },
+      { axis: "TF", optionA: "同じ基準で公平に判断することを大切にしたい", typeA: "T", optionB: "一人ひとりの事情をふまえて判断することを大切にしたい", typeB: "F" },
+      { axis: "TF", optionA: "改善点は必要ならはっきり伝える方がよいと感じる", typeA: "T", optionB: "改善点は相手が受け止めやすい言い方を選びたい", typeB: "F" },
+      { axis: "TF", optionA: "困っている人には解決策を一緒に考えたい", typeA: "T", optionB: "困っている人にはまず気持ちを受け止めたい", typeB: "F" },
+      { axis: "TF", optionA: "話し合いでは結論や根拠を整理したい", typeA: "T", optionB: "話し合いでは場の調和や安心感を整えたい", typeB: "F" },
+      { axis: "TF", optionA: "決めるときは個人的な好みより客観性を重視したい", typeA: "T", optionB: "決めるときは関わる人の納得感を重視したい", typeB: "F" },
+      { axis: "TF", optionA: "率直なフィードバックが成長につながると感じる", typeA: "T", optionB: "温かい励ましが成長につながると感じる", typeB: "F" },
+
+      { axis: "JP", optionA: "予定や段取りを決めてから動く方が落ち着く", typeA: "J", optionB: "状況に合わせて柔軟に進める方がやりやすい", typeB: "P" },
+      { axis: "JP", optionA: "締切があるものは早めに終わらせたい", typeA: "J", optionB: "締切に向けて状況を見ながら集中して進めたい", typeB: "P" },
+      { axis: "JP", optionA: "選択肢が多い状態より早めに決めると安心する", typeA: "J", optionB: "決めきる前に選択肢を残しておくと安心する", typeB: "P" },
+      { axis: "JP", optionA: "旅行や外出では事前に行き先や時間を決めたい", typeA: "J", optionB: "旅行や外出ではその場の流れも楽しみたい", typeB: "P" },
+      { axis: "JP", optionA: "やることをリスト化して完了させると気持ちがよい", typeA: "J", optionB: "やりながら優先順位を変えられると動きやすい", typeB: "P" },
+      { axis: "JP", optionA: "予定外のことが入ると全体の計画を組み直したい", typeA: "J", optionB: "予定外のことが入っても流れに合わせて対応したい", typeB: "P" },
+      { axis: "JP", optionA: "始める前にゴールや手順をはっきりさせたい", typeA: "J", optionB: "始めてから必要に応じて形を決めていきたい", typeB: "P" },
+      { axis: "JP", optionA: "決まっていないことが多いと落ち着かないことがある", typeA: "J", optionB: "決まりすぎていると動きにくく感じることがある", typeB: "P" },
+      { axis: "JP", optionA: "物事は区切りをつけながら進めたい", typeA: "J", optionB: "物事は余白を残しながら進めたい", typeB: "P" }
+    ];
+
+    /*
+      結果文の編集エリア:
+      - types は16タイプ風の結果文です。
+      - 各タイプは title / summary / strength / caution / hint の5項目です。
+      - fallback は中間傾向が含まれる場合に使います。
+      - axisDescriptions は4軸スコアバーの表示文です。
+    */
+    const results = {
+      types: {
+        ESTJ: {
+          title: "現実を整える実行推進傾向",
+          summary: "具体的な情報をもとに、役割や手順を整えながら着実に進める傾向が見られます。",
+          strength: "責任感、整理力、目標に向けて物事を前へ進める力。",
+          caution: "効率や正しさを急ぐと、周囲の気持ちや納得感を確認する時間が短くなることがあります。",
+          hint: "仕事、学び、チーム活動では、目的や段取りを共有しながら進める場面で力を発揮しやすいでしょう。"
+        },
+        ESTP: {
+          title: "状況を動かす実践対応傾向",
+          summary: "目の前の状況をよく見て、現実的に試しながら道を開く傾向が見られます。",
+          strength: "行動力、観察力、変化に合わせて対応する力。",
+          caution: "その場で動ける分、長期的な影響や細かな確認が後回しになることがあります。",
+          hint: "仕事、学び、人間関係では、実際に試して調整する場面や現場での課題解決に活かしやすいでしょう。"
+        },
+        ESFJ: {
+          title: "安心を支える協調実務傾向",
+          summary: "周囲の状況や人の気持ちを見ながら、具体的に支える傾向が見られます。",
+          strength: "気配り、継続力、場を整えながら支える力。",
+          caution: "人の期待に応えようとしすぎると、自分の疲れや希望を後回しにすることがあります。",
+          hint: "仕事、学び、家族やチーム活動では、安心できる場づくりや丁寧な調整で力を発揮しやすいでしょう。"
+        },
+        ESFP: {
+          title: "場を明るくする体験共有傾向",
+          summary: "人との関わりや今この場の体験を大切にしながら、柔軟に動く傾向が見られます。",
+          strength: "親しみやすさ、実践力、場の空気をやわらげる力。",
+          caution: "今の楽しさや相手への配慮を大切にする分、先の準備や約束の確認が後回しになることがあります。",
+          hint: "仕事、学び、人間関係では、体験を通じて学ぶ場や人を巻き込む活動で持ち味を活かしやすいでしょう。"
+        },
+        ENTJ: {
+          title: "未来へ導く戦略実行傾向",
+          summary: "大きな目標を描き、合理的に人や資源を動かしていく傾向が見られます。",
+          strength: "構想力、判断力、目標達成に向けた推進力。",
+          caution: "結論を急ぐと、周囲の納得形成が追いつかないことがあります。",
+          hint: "仕事、学び、チーム活動などで、方向性を示しながら周囲を巻き込む場面で力を発揮しやすいでしょう。"
+        },
+        ENTP: {
+          title: "可能性を広げる発想探究傾向",
+          summary: "新しい見方や選択肢を広げ、試しながら考える傾向が見られます。",
+          strength: "発想力、課題を別角度から見る力、変化への対応力。",
+          caution: "興味が広がる分、最後まで形にする手順や細部の確認が後回しになることがあります。",
+          hint: "仕事、学び、人間関係では、アイデア出しや課題解決、対話から新しい可能性を見つける場面で活かしやすいでしょう。"
+        },
+        ENFJ: {
+          title: "人を育てる共感リード傾向",
+          summary: "人の可能性や関係性を大切にしながら、前向きな方向へ整える傾向が見られます。",
+          strength: "共感力、調整力、周囲を励まして協力を生み出す力。",
+          caution: "周囲を支えたい気持ちが強いほど、自分の負担や本音に気づきにくくなることがあります。",
+          hint: "仕事、学び、チーム活動では、目標を共有し、相手の成長や安心につながる関わりで力を発揮しやすいでしょう。"
+        },
+        ENFP: {
+          title: "可能性をつなぐ共創発想傾向",
+          summary: "人との関わりから刺激を受け、新しい可能性を楽しく広げる傾向が見られます。",
+          strength: "好奇心、共感力、アイデアを人とつなげる力。",
+          caution: "興味が広がる時期には、優先順位や締切の管理が難しく感じられることがあります。",
+          hint: "仕事、学び、人間関係では、対話を通じて発想を広げる場や新しい取り組みを始める場面で活かしやすいでしょう。"
+        },
+        ISTJ: {
+          title: "信頼を積み重ねる堅実実行傾向",
+          summary: "事実や経験を大切にしながら、責任をもって着実に進める傾向が見られます。",
+          strength: "誠実さ、継続力、正確に確認して積み上げる力。",
+          caution: "想定外の変化が続くと、負担を感じたり新しい方法に慎重になったりすることがあります。",
+          hint: "仕事、学び、チーム活動では、手順を整え、品質や約束を守る役割で力を発揮しやすいでしょう。"
+        },
+        ISTP: {
+          title: "冷静に見極める実践分析傾向",
+          summary: "具体的な状況を観察し、必要なことを冷静に判断して動く傾向が見られます。",
+          strength: "分析力、実践力、落ち着いて対応する力。",
+          caution: "自分の中で納得して進める分、考えていることが周囲に伝わりにくいことがあります。",
+          hint: "仕事、学び、人間関係では、実物や現場を見ながら改善する場面や技術的な課題整理で活かしやすいでしょう。"
+        },
+        ISFJ: {
+          title: "身近な安心を守る丁寧支援傾向",
+          summary: "身近な人や場を大切にしながら、具体的に支える傾向が見られます。",
+          strength: "丁寧さ、気配り、責任をもって支える力。",
+          caution: "相手を優先するほど、自分の希望や限界を伝えることが後回しになることがあります。",
+          hint: "仕事、学び、家族やチーム活動では、安心できる仕組みづくりや継続的なサポートで持ち味を活かしやすいでしょう。"
+        },
+        ISFP: {
+          title: "自分らしさを大切にする穏やか実感傾向",
+          summary: "自分の感覚や大切にしたいことをもとに、穏やかに柔軟に動く傾向が見られます。",
+          strength: "やわらかな共感、観察力、実際の体験から学ぶ力。",
+          caution: "強く主張する場面や急な決断が続くと、疲れやすくなることがあります。",
+          hint: "仕事、学び、人間関係では、体験や感性を活かす活動、相手に寄り添う関わりで力を発揮しやすいでしょう。"
+        },
+        INTJ: {
+          title: "未来を設計する戦略探究傾向",
+          summary: "将来の見通しや仕組みを考えながら、計画的に進める傾向が見られます。",
+          strength: "洞察力、戦略性、深く考えて構造化する力。",
+          caution: "頭の中で先まで整理できる分、周囲に説明する前に結論へ進みたくなることがあります。",
+          hint: "仕事、学び、チーム活動では、長期的な改善、設計、研究、複雑な課題の整理で持ち味を活かしやすいでしょう。"
+        },
+        INTP: {
+          title: "仕組みを深める論理探究傾向",
+          summary: "物事の仕組みや意味を深く考え、柔軟に理解を広げる傾向が見られます。",
+          strength: "分析力、探究心、複雑な考えを整理する力。",
+          caution: "考える余地が多いほど、決めることや実行の締切が後ろにずれやすいことがあります。",
+          hint: "仕事、学び、人間関係では、調査、分析、設計、対話を通じて考えを深める場面で活かしやすいでしょう。"
+        },
+        INFJ: {
+          title: "意味を見つめる共感ビジョン傾向",
+          summary: "人や物事の奥にある意味を考えながら、方向性を大切にして進む傾向が見られます。",
+          strength: "洞察力、共感力、長期的な視点で支える力。",
+          caution: "理想や責任感が強いほど、一人で抱え込んだり疲れをためたりすることがあります。",
+          hint: "仕事、学び、家族やチーム活動では、人の成長、支援、深いテーマの整理や場づくりで持ち味を活かしやすいでしょう。"
+        },
+        INFP: {
+          title: "価値観を育てる内省共感傾向",
+          summary: "自分の大切にしたい価値観や人への思いをもとに、可能性を探る傾向が見られます。",
+          strength: "共感力、想像力、自分らしい意味を見つける力。",
+          caution: "納得感を大切にする分、現実的な期限や優先順位を決めるのに時間がかかることがあります。",
+          hint: "仕事、学び、人間関係では、文章、創作、支援、探究など、価値観や思いを形にする場面で活かしやすいでしょう。"
+        }
+      },
+      fallback: {
+        title: "場面に応じて使い分ける中間傾向",
+        summary: "いくつかの軸で中間傾向が見られ、場面や役割によって使いやすい傾向が変わる可能性があります。",
+        strength: "状況に合わせて考え方や関わり方を切り替えられる力。",
+        caution: "どちらのよさも見える分、決めるまでに迷いやすい場面があるかもしれません。",
+        hint: "仕事、学び、人間関係では、その場で何を大切にしたいかを言葉にすると、自分らしい使い分けがしやすくなるでしょう。"
+      },
+      axisDescriptions: {
+        EI: {
+          label: "E/I",
+          leftLetter: "E",
+          leftName: "外向",
+          rightLetter: "I",
+          rightName: "内向",
+          E: "外向傾向",
+          I: "内向傾向",
+          middle: "中間傾向"
+        },
+        SN: {
+          label: "S/N",
+          leftLetter: "S",
+          leftName: "感覚",
+          rightLetter: "N",
+          rightName: "直観",
+          S: "感覚傾向",
+          N: "直観傾向",
+          middle: "中間傾向"
+        },
+        TF: {
+          label: "T/F",
+          leftLetter: "T",
+          leftName: "思考",
+          rightLetter: "F",
+          rightName: "感情",
+          T: "思考傾向",
+          F: "感情傾向",
+          middle: "中間傾向"
+        },
+        JP: {
+          label: "J/P",
+          leftLetter: "J",
+          leftName: "判断",
+          rightLetter: "P",
+          rightName: "知覚",
+          J: "判断傾向",
+          P: "知覚傾向",
+          middle: "中間傾向"
+        }
+      }
+    };
+
+    const axisPairs = {
+      EI: ["E", "I"],
+      SN: ["S", "N"],
+      TF: ["T", "F"],
+      JP: ["J", "P"]
+    };
+
+    const state = {
+      currentIndex: 0,
+      answers: Array(questions.length).fill(null),
+      userInfo: null,
+      startedAtMs: null,
+      endedAtMs: null,
+      durationSeconds: null,
+      source: getSourceFromUrl()
+    };
+
+    let resultSubmitted = false;
+    let resultSubmitting = false;
+
+    const startScreen = document.getElementById("startScreen");
+    const questionScreen = document.getElementById("questionScreen");
+    const resultScreen = document.getElementById("resultScreen");
+    const nicknameInput = document.getElementById("nicknameInput");
+    const ageGroupSelect = document.getElementById("ageGroupSelect");
+    const genderSelect = document.getElementById("genderSelect");
+    const privacyConsent = document.getElementById("privacyConsent");
+    const formError = document.getElementById("formError");
+    const questionCounter = document.getElementById("questionCounter");
+    const axisLabel = document.getElementById("axisLabel");
+    const progressBar = document.getElementById("progressBar");
+    const questionTitle = document.getElementById("questionTitle");
+    const choiceList = document.getElementById("choiceList");
+    const backButton = document.getElementById("backButton");
+    const quitButton = document.getElementById("quitButton");
+    const typeCode = document.getElementById("typeCode");
+    const resultTitle = document.getElementById("resultTitle");
+    const summaryText = document.getElementById("summaryText");
+    const durationText = document.getElementById("durationText");
+    const axisResults = document.getElementById("axisResults");
+    const strengthText = document.getElementById("strengthText");
+    const cautionText = document.getElementById("cautionText");
+    const hintText = document.getElementById("hintText");
+    const submitStatus = document.getElementById("submitStatus");
+
+    document.getElementById("startButton").addEventListener("click", startCheck);
+    document.getElementById("restartButton").addEventListener("click", startCheck);
+    backButton.addEventListener("click", goBack);
+    quitButton.addEventListener("click", resetToTop);
+    [nicknameInput, ageGroupSelect, genderSelect, privacyConsent].forEach((input) => {
+      input.addEventListener("input", updateStartButtonState);
+      input.addEventListener("change", updateStartButtonState);
+    });
+    updateStartButtonState();
+
+    function getSourceFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const source = (params.get("source") || "direct").trim();
+      return (source || "direct").slice(0, 80);
+    }
+
+    function getValidatedUserInfo() {
+      const nickname = nicknameInput.value.trim();
+      const ageGroup = ageGroupSelect.value;
+      const gender = genderSelect.value;
+      const consented = privacyConsent.checked;
+
+      if (!nickname || nickname.length > 30 || !ageGroup || !gender || !consented) {
+        return null;
+      }
+
+      return {
+        nickname,
+        ageGroup,
+        gender
+      };
+    }
+
+    function updateStartButtonState() {
+      const canStart = Boolean(getValidatedUserInfo());
+      document.getElementById("startButton").disabled = !canStart;
+      if (canStart) {
+        formError.textContent = "";
+      }
+    }
+
+    function showRequiredError() {
+      formError.textContent = "必須項目を入力し、個人情報の取扱いに同意してください。";
+    }
+
+    function showScreen(screen) {
+      [startScreen, questionScreen, resultScreen].forEach((item) => {
+        item.classList.toggle("active", item === screen);
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function startCheck() {
+      const userInfo = getValidatedUserInfo();
+      if (!userInfo) {
+        showRequiredError();
+        showScreen(startScreen);
+        return;
+      }
+
+      state.currentIndex = 0;
+      state.answers = Array(questions.length).fill(null);
+      state.userInfo = userInfo;
+      state.startedAtMs = Date.now();
+      state.endedAtMs = null;
+      state.durationSeconds = null;
+      resultSubmitted = false;
+      resultSubmitting = false;
+      submitStatus.textContent = "";
+      durationText.textContent = "";
+      showScreen(questionScreen);
+      renderQuestion();
+    }
+
+    function resetToTop() {
+      state.currentIndex = 0;
+      state.answers = Array(questions.length).fill(null);
+      state.startedAtMs = null;
+      state.endedAtMs = null;
+      state.durationSeconds = null;
+      resultSubmitted = false;
+      resultSubmitting = false;
+      submitStatus.textContent = "";
+      durationText.textContent = "";
+      showScreen(startScreen);
+      updateStartButtonState();
+    }
+
+    function renderQuestion() {
+      const currentQuestion = questions[state.currentIndex];
+      const currentNumber = state.currentIndex + 1;
+      const progress = ((currentNumber - 1) / questions.length) * 100;
+
+      questionCounter.textContent = `質問 ${currentNumber} / ${questions.length}`;
+      axisLabel.textContent = results.axisDescriptions[currentQuestion.axis].label;
+      progressBar.style.width = `${progress}%`;
+      questionTitle.textContent = "あなたにより近いのはどちらですか？";
+      backButton.disabled = state.currentIndex === 0;
+
+      choiceList.innerHTML = "";
+      [
+        { label: "A", text: currentQuestion.optionA, type: currentQuestion.typeA },
+        { label: "B", text: currentQuestion.optionB, type: currentQuestion.typeB }
+      ].forEach((option) => {
+        const item = document.createElement("li");
+        const button = document.createElement("button");
+        button.className = "choice";
+        button.type = "button";
+        button.setAttribute("aria-label", `${option.label}. ${option.text}`);
+        if (state.answers[state.currentIndex] === option.type) {
+          button.classList.add("selected");
+        }
+        button.innerHTML = `
+          <span class="choice-number">${option.label}</span>
+          <span class="choice-copy">${option.text}</span>
+        `;
+        button.addEventListener("click", () => selectAnswer(option.type));
+        item.appendChild(button);
+        choiceList.appendChild(item);
+      });
+    }
+
+    function selectAnswer(type) {
+      state.answers[state.currentIndex] = type;
+      if (state.currentIndex < questions.length - 1) {
+        state.currentIndex += 1;
+        renderQuestion();
+      } else {
+        state.endedAtMs = Date.now();
+        state.durationSeconds = calculateDurationSeconds();
+        progressBar.style.width = "100%";
+        showResult();
+      }
+    }
+
+    function goBack() {
+      if (state.currentIndex === 0) return;
+      state.currentIndex -= 1;
+      renderQuestion();
+    }
+
+    function showResult() {
+      const scored = calculateScores();
+      const hasMiddle = scored.typeCode.includes("X");
+      const text = hasMiddle ? results.fallback : results.types[scored.typeCode];
+
+      typeCode.textContent = scored.typeCode;
+      resultTitle.textContent = `${scored.typeCode}：${text.title}が見られます`;
+      summaryText.textContent = text.summary;
+      durationText.textContent = `回答時間：${formatDuration(state.durationSeconds)}`;
+      strengthText.textContent = text.strength;
+      cautionText.textContent = text.caution;
+      hintText.textContent = text.hint;
+      renderAxisResults(scored.axes);
+      showScreen(resultScreen);
+      submitResultOnce(scored.typeCode);
+    }
+
+    function calculateDurationSeconds() {
+      if (!state.startedAtMs || !state.endedAtMs) return 0;
+      return Math.max(0, Math.round((state.endedAtMs - state.startedAtMs) / 1000));
+    }
+
+    function formatDuration(totalSeconds) {
+      const seconds = Number.isInteger(totalSeconds) ? totalSeconds : 0;
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      if (minutes === 0) return `${remainingSeconds}秒`;
+      return `${minutes}分${remainingSeconds}秒`;
+    }
+
+    function buildSubmissionData(resultType) {
+      return {
+        submittedAt: toIsoStringWithOffset(new Date(state.endedAtMs || Date.now())),
+        nickname: state.userInfo.nickname,
+        ageGroup: state.userInfo.ageGroup,
+        gender: state.userInfo.gender,
+        resultType,
+        durationSeconds: state.durationSeconds,
+        source: state.source
+      };
+    }
+
+    function toIsoStringWithOffset(date) {
+      const timezoneOffset = -date.getTimezoneOffset();
+      const sign = timezoneOffset >= 0 ? "+" : "-";
+      const pad = (value) => String(Math.floor(Math.abs(value))).padStart(2, "0");
+      const year = date.getFullYear();
+      const month = pad(date.getMonth() + 1);
+      const day = pad(date.getDate());
+      const hours = pad(date.getHours());
+      const minutes = pad(date.getMinutes());
+      const seconds = pad(date.getSeconds());
+      const offsetHours = pad(timezoneOffset / 60);
+      const offsetMinutes = pad(timezoneOffset % 60);
+      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${sign}${offsetHours}:${offsetMinutes}`;
+    }
+
+    async function submitResultOnce(resultType) {
+      if (resultSubmitted || resultSubmitting) return;
+
+      resultSubmitting = true;
+      submitStatus.textContent = "集計データを送信しています…";
+
+      try {
+        if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL === "PASTE_GAS_WEB_APP_URL_HERE") {
+          throw new Error("Google Apps ScriptのWebアプリURLが未設定です。");
+        }
+
+        const data = buildSubmissionData(resultType);
+        const payload = new URLSearchParams({
+          submittedAt: data.submittedAt,
+          nickname: data.nickname,
+          ageGroup: data.ageGroup,
+          gender: data.gender,
+          resultType: data.resultType,
+          durationSeconds: String(data.durationSeconds),
+          source: data.source
+        });
+
+        const response = await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          body: payload
+        });
+
+        if (!response.ok) {
+          throw new Error(`送信に失敗しました: ${response.status}`);
+        }
+
+        resultSubmitted = true;
+        submitStatus.textContent = "ご協力ありがとうございました。";
+      } catch (error) {
+        console.error(error);
+        submitStatus.textContent = "集計データを送信できませんでした。診断結果はそのままご覧いただけます。";
+      } finally {
+        resultSubmitting = false;
+      }
+    }
+
+    function calculateScores() {
+      const axisScores = {
+        EI: { E: 0, I: 0 },
+        SN: { S: 0, N: 0 },
+        TF: { T: 0, F: 0 },
+        JP: { J: 0, P: 0 }
+      };
+
+      questions.forEach((item, index) => {
+        const selectedType = state.answers[index];
+        if (selectedType && axisScores[item.axis][selectedType] !== undefined) {
+          axisScores[item.axis][selectedType] += 1;
+        }
+      });
+
+      const axes = {};
+      const typeLetters = [];
+
+      Object.keys(axisScores).forEach((axis) => {
+        const pair = axisPairs[axis];
+        const leftType = pair[0];
+        const rightType = pair[1];
+        const leftScore = axisScores[axis][leftType];
+        const rightScore = axisScores[axis][rightType];
+        const maxDiff = leftScore + rightScore || questions.filter((item) => item.axis === axis).length;
+        const diff = leftScore - rightScore;
+        const absDiff = Math.abs(diff);
+        const tendency = diff === 0 ? "middle" : diff > 0 ? leftType : rightType;
+        const strengthPercent = Math.round((absDiff / maxDiff) * 100);
+        const normalizedScore = getNormalizedAxisScore(diff, maxDiff);
+
+        axes[axis] = {
+          score: diff,
+          leftScore,
+          rightScore,
+          tendency,
+          strengthPercent,
+          normalizedScore,
+          strengthText: getStrengthText(strengthPercent)
+        };
+        typeLetters.push(tendency === "middle" ? "X" : tendency);
+      });
+
+      return {
+        axes,
+        typeCode: typeLetters.join("")
+      };
+    }
+
+    function getStrengthText(strengthPercent) {
+      if (strengthPercent === 0) return "中間";
+      if (strengthPercent <= 35) return "やや";
+      if (strengthPercent <= 70) return "はっきり";
+      return "かなりはっきり";
+    }
+
+    function getNormalizedAxisScore(diff, maxDiff) {
+      return Math.round((diff / maxDiff) * -100);
+    }
+
+    function renderAxisResults(axes) {
+      axisResults.innerHTML = "";
+
+      Object.entries(axes).forEach(([axis, data]) => {
+        const axisText = results.axisDescriptions[axis];
+        const resultLabel = data.tendency === "middle" ? axisText.middle : axisText[data.tendency];
+        const scoreDirection = data.score === 0 ? "ちょうど中間" : data.score > 0 ? `${axisPairs[axis][0]}寄り` : `${axisPairs[axis][1]}寄り`;
+        const fillClass = data.normalizedScore < 0 ? "left-fill" : "right-fill";
+        const fillWidth = Math.max(4, Math.abs(data.normalizedScore) / 2);
+
+        const row = document.createElement("div");
+        row.className = "score-row";
+        row.innerHTML = `
+          <div class="score-row-head">
+            <span class="score-axis">${axisText.label}</span>
+            <span class="score-tendency">${resultLabel}</span>
+          </div>
+          <div class="score-label left">${axisText.leftLetter}<br>${axisText.leftName}</div>
+          <div class="score-bar" role="img" aria-label="${axisText.label}は${resultLabel}です。傾向の強さは${data.strengthText}です。">
+            <div class="center-line"></div>
+            <div class="score-fill ${fillClass}" style="width: ${fillWidth}%;"></div>
+          </div>
+          <div class="score-label right">${axisText.rightLetter}<br>${axisText.rightName}</div>
+          <p class="score-meta">傾向の強さ: ${data.strengthText}（${scoreDirection} / ${data.strengthPercent}%・${axisText.leftLetter} ${data.leftScore}点 / ${axisText.rightLetter} ${data.rightScore}点）</p>
+        `;
+        axisResults.appendChild(row);
+      });
+    }
+  </script>
+</body>
+</html>
